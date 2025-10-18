@@ -67,6 +67,20 @@
             </el-tag>
           </template>
         </el-table-column>
+        <el-table-column label="是否隐藏" prop="visible" width="100">
+          <template #default="{ row }">
+            <el-tag :type="row.visible === '0' ? 'success' : 'info'">
+              {{ row.visible === '0' ? '显示' : '隐藏' }}
+            </el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column label="是否缓存" prop="is_cache" width="100">
+          <template #default="{ row }">
+            <el-tag :type="row.is_cache === '0' ? 'info' : 'success'">
+              {{ row.is_cache === '0' ? '不缓存' : '缓存' }}
+            </el-tag>
+          </template>
+        </el-table-column>
         <el-table-column label="创建时间" prop="create_time" width="180">
           <template #default="{ row }">
             {{ formatDate(row.create_time) }}
@@ -179,6 +193,22 @@
               </el-radio-group>
             </el-form-item>
           </el-col>
+          <el-col :span="12">
+            <el-form-item label="是否隐藏" prop="visible">
+              <el-radio-group v-model="form.visible">
+                <el-radio label="0">显示</el-radio>
+                <el-radio label="1">隐藏</el-radio>
+              </el-radio-group>
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="是否缓存" prop="isCache">
+              <el-radio-group v-model="form.isCache">
+                <el-radio label="0">不缓存</el-radio>
+                <el-radio label="1">缓存</el-radio>
+              </el-radio-group>
+            </el-form-item>
+          </el-col>
         </el-row>
       </el-form>
       <template #footer>
@@ -220,7 +250,9 @@ const form = reactive({
   path: '',
   component: '',
   perms: '',
-  status: '0'
+  status: '0',
+  visible: '0',
+  isCache: '0'
 })
 
 const rules: FormRules = {
@@ -330,6 +362,8 @@ function handleUpdate(row: any) {
     form.component = row.component
     form.perms = row.perms
     form.status = row.status
+    form.visible = row.visible || '0'
+    form.isCache = row.is_cache || '0'
     formRef.value?.clearValidate()
   }, 0)
 }
@@ -385,8 +419,8 @@ async function submitForm() {
           perms: form.perms,
           status: form.status,
           is_frame: '0',
-          is_cache: '0',
-          visible: '0'
+          is_cache: form.isCache,
+          visible: form.visible
         }
 
         if (form.menuId) {
@@ -429,6 +463,8 @@ function reset() {
   form.component = ''
   form.perms = ''
   form.status = '0'
+  form.visible = '0'
+  form.isCache = '0'
   // 清除表单验证状态
   formRef.value?.clearValidate()
   formRef.value?.resetFields()
@@ -440,7 +476,5 @@ onMounted(() => {
 </script>
 
 <style scoped lang="scss">
-.menu-container {
-}
 </style>
 

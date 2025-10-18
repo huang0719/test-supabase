@@ -6,6 +6,7 @@
           <div class="stat-content">
             <div class="stat-icon user-icon">
               <el-icon><User /></el-icon>
+              <el-icon><User /></el-icon>
             </div>
             <div class="stat-info">
               <div class="stat-value">{{ stats.userCount }}</div>

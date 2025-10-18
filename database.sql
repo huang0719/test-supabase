@@ -3,6 +3,9 @@
 -- 基于若依框架的 RBAC 权限模型
 -- =============================================
 
+-- 设置数据库时区为中国时区
+SET timezone = 'Asia/Shanghai';
+
 -- 1. 用户表
 CREATE TABLE IF NOT EXISTS sys_user (
   id UUID PRIMARY KEY DEFAULT auth.uid(),
@@ -171,32 +174,6 @@ VALUES (3, '部门经理', 'dept_manager', 3, '4', '0', '0', '部门经理，可
 INSERT INTO sys_role (role_id, role_name, role_key, role_sort, data_scope, status, del_flag, remark)
 VALUES (4, '访客', 'guest', 4, '1', '0', '0', '访客角色，只有查看权限');
 
--- 3. 插入顶级部门
-INSERT INTO sys_dept (dept_id, parent_id, ancestors, dept_name, order_num, leader, status)
-VALUES (100, 0, '0', '若依科技', 0, '若依', '0');
-
-INSERT INTO sys_dept (dept_id, parent_id, ancestors, dept_name, order_num, leader, status)
-VALUES (101, 100, '0,100', '深圳总公司', 1, '若依', '0');
-
-INSERT INTO sys_dept (dept_id, parent_id, ancestors, dept_name, order_num, leader, status)
-VALUES (102, 100, '0,100', '长沙分公司', 2, '若依', '0');
-
--- 插入深圳总公司下的部门
-INSERT INTO sys_dept (dept_id, parent_id, ancestors, dept_name, order_num, leader, status)
-VALUES (103, 101, '0,100,101', '研发部门', 1, '张三', '0');
-
-INSERT INTO sys_dept (dept_id, parent_id, ancestors, dept_name, order_num, leader, status)
-VALUES (104, 101, '0,100,101', '市场部门', 2, '李四', '0');
-
-INSERT INTO sys_dept (dept_id, parent_id, ancestors, dept_name, order_num, leader, status)
-VALUES (105, 101, '0,100,101', '财务部门', 3, '王五', '0');
-
--- 插入长沙分公司下的部门
-INSERT INTO sys_dept (dept_id, parent_id, ancestors, dept_name, order_num, leader, status)
-VALUES (106, 102, '0,100,102', '市场部门', 1, '赵六', '0');
-
-INSERT INTO sys_dept (dept_id, parent_id, ancestors, dept_name, order_num, leader, status)
-VALUES (107, 102, '0,100,102', '财务部门', 2, '孙七', '0');
 
 -- 4. 插入示例管理员用户（可选）
 -- 注意：这只是示例数据，实际使用时需要先在 Supabase Authentication 中创建用户
@@ -260,6 +237,9 @@ VALUES (102, '菜单管理', 1, 3, 'menu', 'system/menu/index', 'C', '0', '0', '
 INSERT INTO sys_menu (menu_id, menu_name, parent_id, order_num, path, component, menu_type, visible, status, perms, icon)
 VALUES (103, '部门管理', 1, 4, 'dept', 'system/dept/index', 'C', '0', '0', 'system:dept:list', 'OfficeBuilding');
 
+INSERT INTO sys_menu (menu_id, menu_name, parent_id, order_num, path, component, menu_type, visible, status, perms, icon)
+VALUES (104, '个人中心', 1, 5, 'profile', 'system/profile/index', 'C', '0', '0', 'system:profile:view', 'User');
+
 -- 用户管理按钮
 INSERT INTO sys_menu (menu_id, menu_name, parent_id, order_num, menu_type, visible, status, perms)
 VALUES (1000, '用户查询', 100, 1, 'F', '0', '0', 'system:user:query');
@@ -299,18 +279,6 @@ VALUES (1010, '菜单修改', 102, 3, 'F', '0', '0', 'system:menu:edit');
 INSERT INTO sys_menu (menu_id, menu_name, parent_id, order_num, menu_type, visible, status, perms)
 VALUES (1011, '菜单删除', 102, 4, 'F', '0', '0', 'system:menu:remove');
 
--- 部门管理按钮
-INSERT INTO sys_menu (menu_id, menu_name, parent_id, order_num, menu_type, visible, status, perms)
-VALUES (1012, '部门查询', 103, 1, 'F', '0', '0', 'system:dept:query');
-
-INSERT INTO sys_menu (menu_id, menu_name, parent_id, order_num, menu_type, visible, status, perms)
-VALUES (1013, '部门新增', 103, 2, 'F', '0', '0', 'system:dept:add');
-
-INSERT INTO sys_menu (menu_id, menu_name, parent_id, order_num, menu_type, visible, status, perms)
-VALUES (1014, '部门修改', 103, 3, 'F', '0', '0', 'system:dept:edit');
-
-INSERT INTO sys_menu (menu_id, menu_name, parent_id, order_num, menu_type, visible, status, perms)
-VALUES (1015, '部门删除', 103, 4, 'F', '0', '0', 'system:dept:remove');
 
 -- 5. 超级管理员分配所有权限
 INSERT INTO sys_role_menu (role_id, menu_id)
@@ -335,10 +303,7 @@ VALUES
   (3, 1000),  -- 用户查询
   (3, 1001),  -- 用户新增
   (3, 1002),  -- 用户修改
-  (3, 103),   -- 部门管理菜单
-  (3, 1012),  -- 部门查询
-  (3, 1013),  -- 部门新增
-  (3, 1014);  -- 部门修改
+ 
 
 -- 访客角色菜单权限（只读）
 INSERT INTO sys_role_menu (role_id, menu_id)
@@ -347,29 +312,46 @@ VALUES
   (4, 1),     -- 系统管理目录
   (4, 100),   -- 用户管理菜单
   (4, 1000),  -- 用户查询
-  (4, 103),   -- 部门管理菜单
-  (4, 1012);  -- 部门查询
 
--- 7. 角色部门关联（数据权限）
--- 超级管理员拥有所有部门的数据权限
-INSERT INTO sys_role_dept (role_id, dept_id)
-SELECT 1, dept_id FROM sys_dept;
 
--- 普通角色只能查看深圳总公司的数据
-INSERT INTO sys_role_dept (role_id, dept_id)
-VALUES (2, 101);
 
--- 部门经理角色可以查看深圳总公司及其下属部门
-INSERT INTO sys_role_dept (role_id, dept_id)
-VALUES 
-  (3, 101),  -- 深圳总公司
-  (3, 103),  -- 研发部门
-  (3, 104),  -- 市场部门
-  (3, 105);  -- 财务部门
+-- =============================================
+-- 时区修复 - 将时间字段修改为带时区的时间戳
+-- =============================================
 
--- 访客角色可以查看所有部门（只读）
-INSERT INTO sys_role_dept (role_id, dept_id)
-SELECT 4, dept_id FROM sys_dept;
+-- 修改 sys_user 表的时间字段为带时区的时间戳
+ALTER TABLE sys_user 
+  ALTER COLUMN create_time TYPE TIMESTAMPTZ USING create_time AT TIME ZONE 'UTC',
+  ALTER COLUMN update_time TYPE TIMESTAMPTZ USING update_time AT TIME ZONE 'UTC',
+  ALTER COLUMN login_date TYPE TIMESTAMPTZ USING login_date AT TIME ZONE 'UTC';
+
+-- 修改 sys_role 表的时间字段为带时区的时间戳
+ALTER TABLE sys_role
+  ALTER COLUMN create_time TYPE TIMESTAMPTZ USING create_time AT TIME ZONE 'UTC',
+  ALTER COLUMN update_time TYPE TIMESTAMPTZ USING update_time AT TIME ZONE 'UTC';
+
+-- 修改 sys_menu 表的时间字段为带时区的时间戳
+ALTER TABLE sys_menu
+  ALTER COLUMN create_time TYPE TIMESTAMPTZ USING create_time AT TIME ZONE 'UTC',
+  ALTER COLUMN update_time TYPE TIMESTAMPTZ USING update_time AT TIME ZONE 'UTC';
+
+-- 修改 sys_dept 表的时间字段为带时区的时间戳
+ALTER TABLE sys_dept
+  ALTER COLUMN create_time TYPE TIMESTAMPTZ USING create_time AT TIME ZONE 'UTC',
+  ALTER COLUMN update_time TYPE TIMESTAMPTZ USING update_time AT TIME ZONE 'UTC';
+
+-- 修改默认值为当前时区时间
+ALTER TABLE sys_user 
+  ALTER COLUMN create_time SET DEFAULT CURRENT_TIMESTAMP;
+
+ALTER TABLE sys_role
+  ALTER COLUMN create_time SET DEFAULT CURRENT_TIMESTAMP;
+
+ALTER TABLE sys_menu
+  ALTER COLUMN create_time SET DEFAULT CURRENT_TIMESTAMP;
+
+ALTER TABLE sys_dept
+  ALTER COLUMN create_time SET DEFAULT CURRENT_TIMESTAMP;
 
 -- =============================================
 -- 完成

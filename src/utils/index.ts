@@ -28,6 +28,40 @@ export function formatDate(date: string | Date, format: string = 'YYYY-MM-DD HH:
 }
 
 /**
+ * 处理数据库时间，确保显示正确的中国时区时间
+ */
+export function formatDatabaseTime(date: string | Date | null, format: string = 'YYYY-MM-DD HH:mm:ss'): string {
+  if (!date) return ''
+  
+  // 如果是字符串，直接创建Date对象
+  let d: Date
+  if (typeof date === 'string') {
+    d = new Date(date)
+  } else {
+    d = new Date(date)
+  }
+  
+  // 确保时间正确显示（处理时区问题）
+  const utcTime = d.getTime() + (d.getTimezoneOffset() * 60000)
+  const chinaTime = new Date(utcTime + (8 * 3600000)) // 加8小时
+  
+  const year = chinaTime.getFullYear()
+  const month = String(chinaTime.getMonth() + 1).padStart(2, '0')
+  const day = String(chinaTime.getDate()).padStart(2, '0')
+  const hour = String(chinaTime.getHours()).padStart(2, '0')
+  const minute = String(chinaTime.getMinutes()).padStart(2, '0')
+  const second = String(chinaTime.getSeconds()).padStart(2, '0')
+  
+  return format
+    .replace('YYYY', String(year))
+    .replace('MM', month)
+    .replace('DD', day)
+    .replace('HH', hour)
+    .replace('mm', minute)
+    .replace('ss', second)
+}
+
+/**
  * 树形数据转换
  */
 export function handleTree<T extends { [key: string]: any }>(

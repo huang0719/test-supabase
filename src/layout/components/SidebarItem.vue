@@ -89,10 +89,41 @@ function resolvePath(routePath: string) {
 </script>
 
 <style scoped lang="scss">
-.el-menu-item,
-.el-sub-menu {
+:deep(.el-menu-item) {
+  &:hover {
+    background-color: #f5f7fa !important;
+    color: #409eff !important;
+  }
+  
   &.is-active {
-    background-color: #263445 !important;
+    background-color: #ecf5ff !important;
+    color: #409eff !important;
+    border-right: 3px solid #409eff;
+  }
+}
+
+:deep(.el-sub-menu) {
+  .el-sub-menu__title {
+    &:hover {
+      background-color: #f5f7fa !important;
+      color: #409eff !important;
+    }
+  }
+  
+  &.is-active > .el-sub-menu__title {
+    color: #409eff !important;
+  }
+}
+
+:deep(.el-menu--vertical) {
+  .el-menu-item {
+    height: 50px;
+    line-height: 50px;
+  }
+  
+  .el-sub-menu__title {
+    height: 50px;
+    line-height: 50px;
   }
 }
 </style>

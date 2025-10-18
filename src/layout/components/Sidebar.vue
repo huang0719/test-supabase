@@ -7,8 +7,8 @@
         :unique-opened="false"
         :collapse-transition="false"
         mode="vertical"
-        background-color="#304156"
-        text-color="#bfcbd9"
+        background-color="#ffffff"
+        text-color="#606266"
         active-text-color="#409eff"
         router
       >
@@ -58,7 +58,8 @@ const activeMenu = computed(() => {
 .sidebar-container {
   width: 210px;
   height: 100vh;
-  background-color: #304156;
+  background-color: #ffffff;
+  border-right: 1px solid #e4e7ed;
   transition: width 0.28s;
   overflow: hidden;
   position: relative;

@@ -93,7 +93,8 @@ export const useMenuStore = defineStore('menu', () => {
 
     menuList.forEach(menu => {
       if (menu.menuType === 'F') return // 跳过按钮
-      if (menu.visible === '1') return // 跳过隐藏菜单
+      // 注意：这里不应该跳过隐藏菜单，因为隐藏菜单仍然需要注册路由
+      // 只是不在侧边栏显示而已
 
       // 确保路径格式正确
       const menuPath = menu.path.startsWith('/') ? menu.path : `/${menu.path}`
@@ -115,9 +116,9 @@ export const useMenuStore = defineStore('menu', () => {
       if (menu.menuType === 'M' && menu.children && menu.children.length > 0) {
         route.children = []
         
-        // 过滤有效的子菜单
+        // 过滤有效的子菜单（包括隐藏的子菜单，因为隐藏的子菜单仍然需要注册路由）
         const validChildren = menu.children.filter(child => 
-          child.menuType !== 'F' && child.visible !== '1'
+          child.menuType !== 'F' // 只过滤掉按钮类型
         )
         
         validChildren.forEach(child => {
@@ -196,10 +197,15 @@ export const useMenuStore = defineStore('menu', () => {
   async function generateRoutes(userId: string) {
     const menuList = await getMenuList(userId)
     const accessedRoutes = buildRoutes(menuList)
+    
+    // 所有路由都存储在 routes 中（包括隐藏的路由）
     routes.value = accessedRoutes
+    
+    // 只有非隐藏的路由才在侧边栏显示
     sidebarRoutes.value = accessedRoutes.filter(route => !route.meta?.hidden)
     
     console.log(`✅ 动态路由生成成功，共加载 ${accessedRoutes.length} 个路由`)
+    console.log(`📋 侧边栏显示 ${sidebarRoutes.value.length} 个路由，隐藏 ${accessedRoutes.length - sidebarRoutes.value.length} 个路由`)
     return accessedRoutes
   }
 

@@ -98,7 +98,7 @@ const handleLink = (item: any) => {
 const handleCommand = async (command: string) => {
   switch (command) {
     case 'profile':
-      router.push('/user/profile')
+      router.push('/system/profile')
       break
     case 'logout':
       try {

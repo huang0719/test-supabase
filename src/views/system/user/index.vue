@@ -72,7 +72,7 @@
             <span v-if="!row.roles || row.roles.length === 0" style="color: #999;">未分配角色</span>
           </template>
         </el-table-column>
-        <el-table-column label="创建时间" prop="create_time">
+        <el-table-column label="创建时间" prop="create_time" width="180">
           <template #default="{ row }">
             {{ formatDate(row.create_time) }}
           </template>

@@ -33,7 +33,9 @@ router.beforeEach(async (to, from, next) => {
           try {
             const accessRoutes = await menuStore.generateRoutes(userStore.userInfo!.id)
             
-            // 动态添加可访问路由
+            // 动态添加可访问路由（包括隐藏的路由）
+            // 注意：所有路由都需要注册到 Vue Router 中，即使它们在侧边栏中隐藏
+            // 这样用户仍然可以通过直接访问 URL 来访问这些页面
             accessRoutes.forEach(route => {
               router.addRoute(route as any)
             })
