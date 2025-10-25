@@ -5,10 +5,10 @@ import vue from '@vitejs/plugin-vue'
 import vueDevTools from 'vite-plugin-vue-devtools'
 
 // https://vite.dev/config/
-export default defineConfig((mode: ConfigEnv) => {
-  const env = loadEnv(mode.mode, process.cwd());
+export default defineConfig(({ mode }: ConfigEnv) => {
+  const env = loadEnv(mode, process.cwd(), '');
   return {
-    base: env.command === 'serve' ? './' : '/',
+    base: mode === 'development' ? './' : '/',
     plugins: [
       vue(),
       vueDevTools(),
